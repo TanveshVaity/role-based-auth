@@ -29,7 +29,7 @@ export default function SignInPage() {
 
               <CardContent className="space-y-4">
                 <Clerk.Field 
-                  name="identifier"
+                  name="emailAddress"
                   className="flex flex-col gap-2 w-full"
                 >
                   <Clerk.Label>Email</Clerk.Label>
@@ -40,7 +40,7 @@ export default function SignInPage() {
                 </Clerk.Field>
 
                 <Clerk.Field 
-                  name="identifier"
+                  name="password"
                   className="flex flex-col gap-2 w-full"
                 >
                   <Clerk.Label>Password</Clerk.Label>

@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input'
 import * as Clerk from '@clerk/elements/common'
-import * as SignIn from '@clerk/elements/sign-in'
+import * as SignUp from '@clerk/elements/sign-up'
 import { Warehouse } from 'lucide-react'
 import {
   Card,
@@ -18,8 +18,8 @@ export default function SignInPage() {
   return (
     <div className="flex flex-grow items-center justify-center px-4">
       <div className='w-full max-w-sm'>
-        <SignIn.Root>
-          <SignIn.Step name="start">
+        <SignUp.Root>
+          <SignUp.Step name="start">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-center gap-2">
@@ -30,7 +30,7 @@ export default function SignInPage() {
 
               <CardContent className="space-y-4">
                 <Clerk.Field 
-                  name="identifier"
+                  name="username"
                   className="flex flex-col gap-2 w-full"
                 >
                   <Clerk.Label>Username</Clerk.Label>
@@ -41,7 +41,7 @@ export default function SignInPage() {
                 </Clerk.Field>
 
                 <Clerk.Field 
-                  name="identifier"
+                  name="emailAdress"
                   className="flex flex-col gap-2 w-full"
                 >
                   <Clerk.Label>Email</Clerk.Label>
@@ -52,7 +52,7 @@ export default function SignInPage() {
                 </Clerk.Field>
 
                 <Clerk.Field 
-                  name="identifier"
+                  name="password"
                   className="flex flex-col gap-2 w-full"
                 >
                   <Clerk.Label>Password</Clerk.Label>
@@ -64,12 +64,12 @@ export default function SignInPage() {
               </CardContent>
 
               <CardFooter className="flex flex-col space-y-4">
-                <SignIn.Action
+                <SignUp.Action
                   submit
                   asChild
                 >
-                  <Button className="w-full font-bold text-white cursor-pointer">Sign In</Button>
-                </SignIn.Action>
+                  <Button className="w-full font-bold text-white cursor-pointer">Sign Up</Button>
+                </SignUp.Action>
 
                 <p className="text-center text-sm text-zinc-500">
                   Have an account?{' '}
@@ -77,7 +77,7 @@ export default function SignInPage() {
                     navigate="sign-in"
                     className="font-medium underline-offset-4 outline-none hover:text-zinc-700 hover:underline focus-visible:underline"
                   >
-                    Sign in
+                    Sign In
                   </Clerk.Link>
                 </p>
 
@@ -101,8 +101,31 @@ export default function SignInPage() {
                 </Clerk.Connection>
               </CardFooter>
             </Card>
-          </SignIn.Step>
-        </SignIn.Root>
+          </SignUp.Step>
+
+          <SignUp.Step name="continue">
+            <Card>
+              <CardHeader>
+                <CardTitle>Complete Your Signup</CardTitle>
+              </CardHeader>
+              <Clerk.Field 
+                  name="username"
+                  className="flex flex-col gap-2 w-full"
+                >
+                  <Clerk.Label>Username</Clerk.Label>
+                  <Clerk.Input asChild>
+                    <Input />
+                  </Clerk.Input>
+                  <Clerk.FieldError />
+                </Clerk.Field>
+              <CardFooter>
+                <SignUp.Action submit asChild>
+                  <Button className="w-full cursor-pointer font-bold text-white">Continue</Button>
+                </SignUp.Action>
+              </CardFooter>
+            </Card>
+          </SignUp.Step>
+        </SignUp.Root>
       </div>
     </div>
   )
