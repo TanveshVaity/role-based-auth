@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/form";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -34,7 +33,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Textarea } from "@/components/ui/textarea"
-import Dropdown from "@/components/Dropdown";
+import { MultiSelect } from "@/components/multi-select";
 
 type Product = {
   id: string;
@@ -55,7 +54,7 @@ const productFormSchema = z.object({
   description: z.string().min(2, "Description is required"),
   price: z.coerce.number().min(1, "Price must be at least 1"),
   stock: z.coerce.number().min(0, "Stock can't be negative"),
-  categories: z.array(z.string()).nonempty("Select at least one"),
+  categories: z.array(z.string()).nonempty("Select at least one category"),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -70,32 +69,50 @@ export default function ProductTable() {
   const [data, setData] = useState<Product[]>([]);
   const [cats, setCats] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    axios
-      .get<Product[]>("/api/product")
-      .then((res) => setData(res.data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        const [productsRes, categoriesRes] = await Promise.all([
+          axios.get<Product[]>("/api/product"),
+          axios.get<Category[]>("/api/categories")
+        ]);
+        
+        setData(productsRes.data);
+        setCats(categoriesRes.data);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    axios
-      .get<Category[]>("/api/categories")
-      .then(res => setCats(res.data))
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
+    fetchData();
   }, []);
 
   if (loading) return <p className="p-6 text-center">Loading products…</p>;
   if (error) return <p className="p-6 text-center text-red-600">Error: {error}</p>;
 
   async function onSubmit(values: ProductFormValues) {
+    setIsSubmitting(true);
     try {
       const res = await axios.post("/api/product", values);
+      
+      // Add the new product to the local state
+      setData(prevData => [...prevData, res.data]);
+      
+      // Close the dialog and reset form
       setOpen(false);
       form.reset();
     } catch (err: any) {
       console.error("Error creating product:", err);
+      setError("Failed to create product");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -108,10 +125,10 @@ export default function ProductTable() {
     <div className="mt-6 px-4 overflow-x-auto">
       <div className="relative flex justify-between items-center mb-4">
         <h2 className="text-3xl font-bold">Products</h2>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => setOpen(true)}>
-              Open
+            <Button variant="outline" size="sm" className="cursor-pointer">
+              Add Product
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -157,8 +174,9 @@ export default function ProductTable() {
                       <FormControl>
                         <Input 
                           type="number" 
+                          placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value)}
+                          onChange={(e) => field.onChange(Number(e.target.value) || 0)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -175,8 +193,9 @@ export default function ProductTable() {
                       <FormControl>
                         <Input 
                           type="number" 
+                          placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(e.target.value)}
+                          onChange={(e) => field.onChange(Number(e.target.value) || 0)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -191,10 +210,13 @@ export default function ProductTable() {
                     <FormItem>
                       <FormLabel>Categories</FormLabel>
                       <FormControl>
-                        <Dropdown
-                          items={transformedItems}
-                          value={field.value[0] || ""} 
-                          onChange={(value) => field.onChange([value])} 
+                        <MultiSelect
+                          options={transformedItems}
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          variant="inverted"
+                          maxCount={3}
+                          placeholder="Select categories..."
                         />
                       </FormControl>
                       <FormMessage />
@@ -203,11 +225,21 @@ export default function ProductTable() {
                 />
 
                 <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline" className="w-1/2 cursor-pointer">Cancel</Button>
-                  </DialogClose>
-                  <Button type="submit" className="text-white w-1/2 cursor-pointer">
-                    Add Product
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-1/2 cursor-pointer"
+                    onClick={() => setOpen(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="text-white w-1/2 cursor-pointer"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Adding..." : "Add Product"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -215,6 +247,13 @@ export default function ProductTable() {
           </DialogContent>
         </Dialog>
       </div>
+      
+      {error && (
+        <div className="mb-4 p-4 text-red-600 bg-red-50 border border-red-200 rounded">
+          {error}
+        </div>
+      )}
+
       <Table className="table-auto md:table-fixed [&_:is(th,td):nth-child(4)]:text-right max-w-5xl mx-auto">
         <TableHeader>
           <TableRow>
@@ -225,18 +264,26 @@ export default function ProductTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((prod) => (
-            <TableRow key={prod.id}>
-              <TableCell className="px-4 py-2">{prod.name}</TableCell>
-              <TableCell className="px-4 py-2">
-                {prod.description ?? "—"}
-              </TableCell>
-              <TableCell className="px-4 py-2">{prod.stock}</TableCell>
-              <TableCell className="px-4 py-2">
-                ₹ {prod.price.toLocaleString()}
+          {data.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                No products found. Add your first product!
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            data.map((prod) => (
+              <TableRow key={prod.id}>
+                <TableCell className="px-4 py-2">{prod.name}</TableCell>
+                <TableCell className="px-4 py-2">
+                  {prod.description ?? "—"}
+                </TableCell>
+                <TableCell className="px-4 py-2">{prod.stock}</TableCell>
+                <TableCell className="px-4 py-2">
+                  ₹ {prod.price.toLocaleString()}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>
