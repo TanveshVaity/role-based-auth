@@ -56,7 +56,8 @@ model ProductCategory {
 
 model Inventory {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  quantity   Int
+  available  Int
+  sold       Int
   product    Product  @relation(fields: [productId], references: [id])
   productId  String   @unique @db.ObjectId
   createdAt  DateTime @default(now())

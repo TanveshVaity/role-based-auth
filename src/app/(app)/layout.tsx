@@ -6,8 +6,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarProvider>
         <div className="flex min-h-screen">
           <AppSidebar />
-          <SidebarInset className="flex-1 flex flex-col">
-            <main className="flex-1 overflow-auto">
+          <SidebarInset className="flex-1 flex flex-col min-h-0">
+            <main className="flex flex-1 overflow-auto">
               {children}
             </main>
           </SidebarInset>
