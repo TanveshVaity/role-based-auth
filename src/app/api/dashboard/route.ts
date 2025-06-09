@@ -6,7 +6,7 @@ export async function GET(request: Request): Promise<Response> {
     const [totalProducts, totalCategories, inventoryAgg] = await Promise.all([
       prisma.product.count(),
       prisma.category.count(),
-      prisma.inventory.aggregate({ _sum: { quantity: true } }).then(r => r._sum.quantity ?? 0),
+      prisma.inventory.aggregate({ _sum: { available: true } }).then(r => r._sum.available ?? 0),
     ]);
 
     const data = {
