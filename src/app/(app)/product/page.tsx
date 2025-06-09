@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -101,11 +100,7 @@ export default function ProductTable() {
     setIsSubmitting(true);
     try {
       const res = await axios.post("/api/product", values);
-      
-      // Add the new product to the local state
-      setData(prevData => [...prevData, res.data]);
-      
-      // Close the dialog and reset form
+      setData(prevData => [...prevData, res.data]);      
       setOpen(false);
       form.reset();
     } catch (err: any) {
@@ -123,7 +118,7 @@ export default function ProductTable() {
 
   return (
     <div className="mt-6 px-4 overflow-x-auto">
-      <div className="relative flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-3xl font-bold">Products</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>

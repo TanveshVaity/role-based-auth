@@ -125,6 +125,8 @@ export default function SignInPage() {
               </CardFooter>
             </Card>
           </SignUp.Step>
+
+          
         </SignUp.Root>
       </div>
     </div>
