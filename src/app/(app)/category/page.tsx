@@ -33,6 +33,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MultiSelect } from "@/components/multi-select";
+import { useAuth } from "@clerk/nextjs";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -48,6 +49,10 @@ export default function CategoryTable() {
     resolver: zodResolver(categorySchema),
     defaultValues: { name: "", description: "", products: [] },
   });
+
+  const { isLoaded, userId, sessionClaims } = useAuth();
+  const isAdmin = sessionClaims?.metadata.role === 'admin';
+
   const [open, setOpen] = useState(false);
   const [cats, setCats] = useState<{ id: string; name: string; description?: string }[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -86,55 +91,57 @@ export default function CategoryTable() {
     <div className="mt-6 px-4 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-3xl font-bold">Categories</h2>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" className="cursor-pointer">Add Category</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>New Category</DialogTitle></DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField name="name" control={form.control} render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+        {isAdmin && (
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="cursor-pointer">Add Category</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>New Category</DialogTitle></DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <FormField name="name" control={form.control} render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <FormControl><Input {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
 
-                <FormField name="description" control={form.control} render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl><Textarea {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                  <FormField name="description" control={form.control} render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl><Textarea {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
 
-                <FormField name="products" control={form.control} render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Products</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        options={products.map(p => ({ value: p.id, label: p.name }))}
-                        defaultValue={field.value}
-                        onValueChange={field.onChange}
-                        variant="inverted"
-                        maxCount={3}
-                        placeholder="Select products"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                  <FormField name="products" control={form.control} render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Products</FormLabel>
+                      <FormControl>
+                        <MultiSelect
+                          options={products.map(p => ({ value: p.id, label: p.name }))}
+                          defaultValue={field.value}
+                          onValueChange={field.onChange}
+                          variant="inverted"
+                          maxCount={3}
+                          placeholder="Select products"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
 
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setOpen(false)} className="w-1/2 cursor-pointer">Cancel</Button>
-                  <Button type="submit" className="w-1/2 text-white cursor-pointer">Save</Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)} className="w-1/2 cursor-pointer">Cancel</Button>
+                    <Button type="submit" className="w-1/2 text-white cursor-pointer">Save</Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <div className="overflow-x-auto">

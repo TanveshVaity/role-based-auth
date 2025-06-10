@@ -13,3 +13,33 @@ export async function GET() {
   }
 }
 
+export async function POST(req: Request) {
+  try {
+    const { productId, available, sold } = await req.json();
+    
+    // Validate input
+    if (!productId || isNaN(available) || isNaN(sold)) {
+      return NextResponse.json(
+        { error: 'Invalid input data' },
+        { status: 400 }
+      );
+    }
+
+    const newItem = await prisma.inventory.create({
+      data: {
+        productId,
+        available: parseInt(available),
+        sold: parseInt(sold),
+      },
+      include: { product: true },
+    });
+
+    return NextResponse.json(newItem, { status: 201 });
+  } catch (err) {
+    console.error('POST inventory error', err);
+    return NextResponse.json(
+      { error: 'Failed to create inventory item' },
+      { status: 500 }
+    );
+  }
+}
