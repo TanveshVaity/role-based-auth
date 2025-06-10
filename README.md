@@ -38,7 +38,7 @@ Make sure you have:
 ### 2. Configure environment
 Open .env and replace placeholders:
 ```env
-    DATABASE_URL="mongodb+srv://<username>:<password>@cluster0.mongodb.net/role-based-auth?retryWrites=true&w=majority&appName=Cluster0"
+    DATABASE_URL="mongodb+srv://<username>:<password>@cluster0.mongodb.net/<database_name>?retryWrites=true&w=majority&appName=Cluster0"
 
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
     CLERK_SECRET_KEY=sk_test_...
