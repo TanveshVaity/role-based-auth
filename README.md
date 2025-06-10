@@ -28,11 +28,12 @@ Make sure you have:
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/TanveshVaity/role-based-auth.git
-cd role-based-auth
-yarn install
-# or
-npm install
+    git clone https://github.com/TanveshVaity/role-based-auth.git
+    cd role-based-auth
+    yarn install
+    # or
+    npm install
+```
 
 ### 2. Configure environment
 Open .env and replace placeholders:
