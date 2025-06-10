@@ -69,7 +69,7 @@ export default function InventoryTable() {
 
   
   const { isLoaded, userId, sessionClaims } = useAuth();
-  const isAdmin = sessionClaims?.metadata.role === 'admin';
+  const isMaster = sessionClaims?.metadata.role === 'master';
 
   useEffect(() => {
     Promise.all([
@@ -104,7 +104,7 @@ export default function InventoryTable() {
     <div className="mt-6 px-4 overflow-x-auto">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-3xl font-bold">Inventory</h2>
-        {isAdmin && (
+        {isMaster && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="cursor-pointer">Add Inventory</Button>

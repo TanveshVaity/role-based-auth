@@ -66,7 +66,7 @@ export default function ProductTable() {
   });
 
   const { isLoaded, userId, sessionClaims } = useAuth();
-  const isAdmin = sessionClaims?.metadata.role === 'admin';
+  const isMaster = sessionClaims?.metadata.role === 'master';
 
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<Product[]>([]);
@@ -124,7 +124,7 @@ export default function ProductTable() {
     <div className="mt-6 px-4 overflow-x-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-3xl font-bold">Products</h2>
-        {isAdmin && (
+        {isMaster && (
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="cursor-pointer">
